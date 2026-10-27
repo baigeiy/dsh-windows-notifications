@@ -1,0 +1,8 @@
+winrt-Windows.UI.Notifications==3.2.1
+winrt-Windows.Data.Xml.Dom==3.2.1
+winrt-Windows.Foundation==3.2.1
+winrt-Windows.Foundation.Collections==3.2.1
+winrt-Windows.System==3.2.1
+pywin32==312
+pillow==12.3.0
+uiautomation==2.0.29
