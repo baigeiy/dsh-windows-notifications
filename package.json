@@ -3,11 +3,54 @@
   "version": "0.6.0",
   "description": "本机 Windows 通知、确认收到与可自定义的专属设置页面。",
   "license": "MIT",
-  "repository": {"type": "git", "url": "git+https://github.com/baigeiy/dsh-windows-notifications.git"},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baigeiy/dsh-windows-notifications.git"
+  },
   "homepage": "https://github.com/baigeiy/dsh-windows-notifications#readme",
-  "keywords": ["dsh", "dsh-plugin", "deepseek-harness", "windows", "notifications"],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "windows",
+    "notifications"
+  ],
   "icon": "./official-whale.png",
-  "files": ["index-v5.mjs", "client.js", "web-v4.mjs", "native.mjs", "preferences.mjs", "receipts.mjs", "focus.js", "settings.js", "settings-v3.html", "activate.py", "clear.py", "foreground.py", "identity.py", "icons.py", "notify-v3.py", "reuse-browser.py", "register-machine.py", "check-protocol.py", "requirements.txt", "notification-launcher.cs", "setup.ps1", "official-whale.png", "whale.png", "whale-icon.png", "cordis.patch.yml", "README.md", "LICENSE", "NOTICE.md", "screenshots.json", "docs/settings.png"],
+  "files": [
+    "index-v5.mjs",
+    "client.js",
+    "web-v4.mjs",
+    "native.mjs",
+    "preferences.mjs",
+    "receipts.mjs",
+    "focus.js",
+    "settings.js",
+    "settings-v3.html",
+    "activate.py",
+    "clear.py",
+    "foreground.py",
+    "identity.py",
+    "icons.py",
+    "notify-v3.py",
+    "reuse-browser.py",
+    "register-machine.py",
+    "check-protocol.py",
+    "requirements.txt",
+    "notification-launcher.cs",
+    "setup.ps1",
+    "official-whale.png",
+    "whale.png",
+    "whale-icon.png",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md",
+    "screenshots.json",
+    "docs/settings.png",
+    "check-activation.py",
+    "check-reuse.py",
+    "check-focus.py"
+  ],
   "type": "module",
   "exports": {
     ".": "./index-v5.mjs",
@@ -15,10 +58,14 @@
     "./package.json": "./package.json"
   },
   "dsh": {
-    "bundle": {"patch": "./cordis.patch.yml"},
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-settings-general"]
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings-general"
+      ]
     }
   }
 }
