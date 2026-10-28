@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readPreferences } from './preferences.mjs'
 import { attachWeb } from './web-v4.mjs'
 import { ReceiptStore } from './receipts.mjs'
+import { pythonPath } from './native.mjs'
 
 export const name = 'local-windows-notifications'
 export const inject = ['agents']
@@ -15,6 +16,7 @@ const directory = dirname(fileURLToPath(import.meta.url))
 /** Attach reversible observers without changing question answers or Session events. */
 export function apply(ctx, config = {}) {
   if (process.platform !== 'win32') throw new Error('Windows notifications require Windows')
+  pythonPath()
   const baseUrl = new URL(config.baseUrl ?? 'http://127.0.0.1:3080/').href
   const timeoutMs = config.timeoutMs ?? 15000
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1) throw new Error('timeoutMs must be a positive integer')
@@ -50,7 +52,7 @@ export function apply(ctx, config = {}) {
     acknowledgements.set(token, { tag, time: now })
     const openUrl = new URL('dsh-local-notification://open')
     openUrl.searchParams.set('token', token)
-    const child = spawn(join(directory, '.venv/Scripts/python.exe'),
+    const child = spawn(pythonPath(),
       [join(directory, 'notify-v3.py')],
       { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'], timeout: timeoutMs })
     let stderr = ''

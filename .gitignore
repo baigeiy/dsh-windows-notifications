@@ -1,5 +1,6 @@
 *
 !.gitignore
+!.gitattributes
 !package.json
 !cordis.patch.yml
 !README.md
@@ -9,6 +10,18 @@
 !docs/
 docs/*
 !docs/settings.png
+!docs/banner.svg
+!docs/development.md
+!docs/releases/
+!docs/releases/*.md
+!native/
+native/*
+!native/windows-x64.zip
+!native/manifest.json
+!requirements.lock
+!build-runtime.ps1
+!build-release.ps1
+!check-distribution.ps1
 !check-activation.py
 !check-reuse.py
 !check-focus.py

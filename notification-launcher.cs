@@ -19,9 +19,10 @@ internal static class NotificationLauncher
             if (args.Length != 1 || !Regex.IsMatch(args[0], @"\Adsh-local-notification://open/?\?token=[A-Za-z0-9_-]{43}\z"))
                 throw new ArgumentException("Invalid notification activation");
             File.WriteAllText(Path.Combine(directory, "activation-launcher.log"), DateTime.UtcNow.ToString("O") + " started\n");
+            string bundledPython = Path.Combine(directory, "runtime", "python.exe");
             var start = new ProcessStartInfo
             {
-                FileName = Path.Combine(directory, ".venv", "Scripts", "python.exe"),
+                FileName = File.Exists(bundledPython) ? bundledPython : Path.Combine(directory, ".venv", "Scripts", "python.exe"),
                 Arguments = "\"" + Path.Combine(directory, "activate.py") + "\" \"" + args[0] + "\"",
                 WorkingDirectory = directory,
                 UseShellExecute = false,

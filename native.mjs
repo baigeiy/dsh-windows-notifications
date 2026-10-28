@@ -1,12 +1,21 @@
 /** Bounded calls to the local Windows notification helpers. */
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 const directory = dirname(fileURLToPath(import.meta.url))
 
+export function pythonPath() {
+  const bundled = join(directory, 'runtime/python.exe')
+  if (existsSync(bundled)) return bundled
+  const development = join(directory, '.venv/Scripts/python.exe')
+  if (existsSync(development)) return development
+  throw new Error(`Windows notification runtime is missing. Run setup.ps1 in an administrator PowerShell from ${directory}.`)
+}
+
 export function runNative(script, input) {
   return new Promise((resolve, reject) => {
-    const child = spawn(join(directory, '.venv/Scripts/python.exe'), [join(directory, script)], {
+    const child = spawn(pythonPath(), [join(directory, script)], {
       windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'], timeout: 15000,
     })
     let output = ''

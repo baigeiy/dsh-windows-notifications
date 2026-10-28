@@ -1,6 +1,6 @@
 {
   "name": "dsh-windows-notifications",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "本机 Windows 通知、确认收到与可自定义的专属设置页面。",
   "license": "MIT",
   "repository": {
@@ -36,8 +36,14 @@
     "register-machine.py",
     "check-protocol.py",
     "requirements.txt",
+    "requirements.lock",
     "notification-launcher.cs",
     "setup.ps1",
+    "build-runtime.ps1",
+    "build-release.ps1",
+    "check-distribution.ps1",
+    "native/windows-x64.zip",
+    "native/manifest.json",
     "official-whale.png",
     "whale.png",
     "whale-icon.png",
@@ -47,11 +53,15 @@
     "NOTICE.md",
     "screenshots.json",
     "docs/settings.png",
+    "docs/banner.svg",
+    "docs/development.md",
     "check-activation.py",
     "check-reuse.py",
     "check-focus.py"
   ],
   "type": "module",
+  "os": ["win32"],
+  "cpu": ["x64"],
   "exports": {
     ".": "./index-v5.mjs",
     "./client": "./client.js",

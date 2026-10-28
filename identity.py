@@ -21,7 +21,7 @@ def ensure_protocol():
     """Register only this plugin's local notification activation command."""
     launcher = DIRECTORY / "dsh-notification-activate.exe"
     if not launcher.is_file():
-        raise FileNotFoundError("Build the local notification launcher before registering it")
+        raise FileNotFoundError("Run setup.ps1 to install the notification launcher")
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, rf"Software\Classes\{PROTOCOL}") as key:
         winreg.SetValueEx(key, "", 0, winreg.REG_SZ, "URL:DeepSeek Harness notification")
         winreg.SetValueEx(key, "URL Protocol", 0, winreg.REG_SZ, "")
@@ -59,7 +59,9 @@ def ensure_identity(preferences):
     ensure_protocol()
     name = preferences.get("appName", "DeepSeek Harness")
     icon = icon_path(preferences.get("appIcon", "official"), "app")
-    fingerprint = hashlib.sha256(name.encode() + icon.read_bytes()).hexdigest()
+    bundled_python = DIRECTORY / "runtime/pythonw.exe"
+    pythonw = bundled_python if bundled_python.is_file() else DIRECTORY / ".venv/Scripts/pythonw.exe"
+    fingerprint = hashlib.sha256(name.encode() + icon.read_bytes() + str(DIRECTORY).encode() + str(pythonw).encode()).hexdigest()
     marker = DIRECTORY / "identity.json"
     if marker.exists():
         previous = json.loads(marker.read_text(encoding="utf-8"))
@@ -74,7 +76,6 @@ def ensure_identity(preferences):
     shortcut_dir.mkdir(parents=True, exist_ok=True)
     filename = re.sub(r'[<>:"/\\|?*]', "_", name).strip(". ") or "DeepSeek Harness"
     shortcut_path = shortcut_dir / f"{filename}.lnk"
-    pythonw = DIRECTORY / ".venv/Scripts/pythonw.exe"
     helper = DIRECTORY / "activate.py"
     pythoncom.CoInitialize()
     try:
