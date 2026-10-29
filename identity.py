@@ -11,10 +11,9 @@ import pythoncom
 from win32com.propsys import propsys, pscon
 from win32com.shell import shell, shellcon
 from PIL import Image
+from identity_constants import APP_ID, PROTOCOL
 
 DIRECTORY = Path(__file__).resolve().parent
-APP_ID = "DeepSeekHarness.Notifications"
-PROTOCOL = "dsh-local-notification"
 
 
 def ensure_protocol():

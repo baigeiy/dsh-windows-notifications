@@ -27,6 +27,8 @@ native/*
 !check-reuse.py
 !check-focus.py
 !check-image.py
+!check-open.mjs
+!check-client-v4.mjs
 !index-v5.mjs
 !client.js
 !web-v4.mjs
@@ -40,6 +42,8 @@ native/*
 !clear.py
 !foreground.py
 !identity.py
+!identity_constants.py
+!window_activation.py
 !icons.py
 !notify-v3.py
 !reuse-browser.py

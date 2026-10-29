@@ -1,6 +1,6 @@
 {
   "name": "dsh-windows-notifications",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "本机 Windows 通知、确认收到与可自定义的专属设置页面。",
   "license": "MIT",
   "repository": {
@@ -30,6 +30,8 @@
     "clear.py",
     "foreground.py",
     "identity.py",
+    "identity_constants.py",
+    "window_activation.py",
     "icons.py",
     "notify-v3.py",
     "reuse-browser.py",
@@ -58,6 +60,7 @@
     "docs/files.md",
     "docs/releases/v0.7.0.md",
     "docs/releases/v0.7.1.md",
+    "docs/releases/v0.7.2.md",
     "check-activation.py",
     "check-reuse.py",
     "check-focus.py",

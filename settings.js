@@ -1,10 +1,11 @@
 /** Notification appearance form; values and uploaded images stay on the local dsh Host. */
 (() => {
-  const keys = ['notifyWhenFocused', 'appName', 'appIcon', 'notificationIcon', 'questionTitle', 'approvalTitle', 'completionTitle']
+  const keys = ['notifyWhenFocused', 'openDshOnClick', 'appName', 'appIcon', 'notificationIcon', 'questionTitle', 'approvalTitle', 'completionTitle']
+  const booleanKeys = new Set(['notifyWhenFocused', 'openDshOnClick'])
   const el = id => document.getElementById(id)
   const status = (text, error = false) => { el('status').textContent = text; el('status').className = error ? 'error' : '' }
-  const values = () => Object.fromEntries(keys.map(key => [key, key === 'notifyWhenFocused' ? el(key).checked : el(key).value]))
-  const apply = value => { for (const key of keys) if (key === 'notifyWhenFocused') el(key).checked = value[key]; else el(key).value = value[key]; render() }
+  const values = () => Object.fromEntries(keys.map(key => [key, booleanKeys.has(key) ? el(key).checked : el(key).value]))
+  const apply = value => { const preferences = {openDshOnClick:true,...value}; for (const key of keys) if (booleanKeys.has(key)) el(key).checked = preferences[key]; else el(key).value = preferences[key]; render() }
   const icon = (role, choice) => `/dsh-notifications/icon?role=${role}&choice=${choice}&v=${Date.now()}`
   const render = () => {
     const value = values()
@@ -14,6 +15,10 @@
     el('notificationPreview').src = el('bodyPreview').src = notification
     el('sourceName').textContent = value.appName
     el('titlePreview').textContent = value[el('previewKind').value === 'completed' ? 'completionTitle' : 'questionTitle']
+    el('openPreview').hidden = !value.openDshOnClick
+    el('previewNote').textContent = value.openDshOnClick
+      ? '预览不可点击。“确认收到”只收起通知；点击正文或“打开 dsh”会切换到已打开的页面。'
+      : '预览不可点击。实际通知只收起，不打开或切换浏览器。'
   }
   const api = async (path, value) => {
     const response = await fetch(`/dsh-notifications/${path}`, value === undefined ? {} : {

@@ -9,9 +9,8 @@ import win32api
 import win32con
 import win32gui
 import win32process
-import uiautomation as auto
-from comtypes import COMError
 from foreground import matches_dsh_title
+from window_activation import NativeFocusDenied, focus_window, stop_taskbar_attention
 
 TAB_TYPES = {50019, 50024}
 BROWSER_CLASSES = {"Chrome_WidgetWin_1", "MozillaWindowClass"}
@@ -19,8 +18,16 @@ BROWSER_PROGRAMS = {"msedge.exe", "chrome.exe", "firefox.exe", "brave.exe", "viv
 STATE = Path(__file__).with_name("reuse-state.json")
 
 
+
+
 def record(phase, **details):
     STATE.write_text(json.dumps({"time": time.time(), "phase": phase, **details}), encoding="utf-8")
+
+
+def ui_control(hwnd):
+    """Load browser accessibility support only when a tab or focus fallback needs it."""
+    import uiautomation
+    return uiautomation.ControlFromHandle(hwnd)
 
 
 def browser_process(hwnd):
@@ -53,6 +60,7 @@ def controls(root, deadline, max_depth=8):
                 queue.extend((child, depth + 1) for child in control.GetChildren())
             except Exception as error:
                 # A tab may close while its browser chrome is being enumerated.
+                from comtypes import COMError
                 if not isinstance(error, (LookupError, OSError, COMError)):
                     raise
 
@@ -67,59 +75,40 @@ def browser_windows():
     return sorted(windows, key=lambda hwnd: hwnd != foreground)
 
 
-def focus_window(hwnd):
-    if win32gui.IsIconic(hwnd):
-        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
-    if win32gui.GetForegroundWindow() == hwnd:
-        return
-    try:
-        win32gui.BringWindowToTop(hwnd)
-        win32gui.SetForegroundWindow(hwnd)
-    except win32gui.error:
-        # Windows can restrict foreground activation by a background helper.
-        auto.ControlFromHandle(hwnd).SetFocus()
-    if win32gui.GetForegroundWindow() == hwnd:
-        return
-    current_thread = win32api.GetCurrentThreadId()
-    foreground = win32gui.GetForegroundWindow()
-    foreground_thread = win32process.GetWindowThreadProcessId(foreground)[0] if foreground else current_thread
-    attached = False
-    try:
-        if foreground_thread != current_thread:
-            try:
-                win32process.AttachThreadInput(current_thread, foreground_thread, True)
-                attached = True
-            except win32process.error:
-                # Cross-integrity foreground threads can deny input attachment.
-                auto.ControlFromHandle(hwnd).SetFocus()
-                if win32gui.GetForegroundWindow() == hwnd:
-                    return
-        win32gui.BringWindowToTop(hwnd)
-        win32gui.SetForegroundWindow(hwnd)
-    finally:
-        if attached:
-            win32process.AttachThreadInput(current_thread, foreground_thread, False)
 
 
-def reuse(marker):
+def reuse(marker, close_handoff=False):
     record("scan")
     deadline = time.monotonic() + 10
     candidates = []
     windows = browser_windows()
     record("scan", windows=len(windows))
+    # A selected DSH tab is already identified by its browser's native window title.
     for hwnd in windows:
-        root = auto.ControlFromHandle(hwnd)
-        for control in controls(root, deadline):
-            if control.ControlType in TAB_TYPES:
-                name = control.Name
-                if matches_dsh_title(name) and not name.startswith("Windows 通知"):
-                    candidates.append((hwnd, control))
-        if candidates:
+        title = win32gui.GetWindowText(hwnd)
+        if matches_dsh_title(title) and not title.startswith("Windows 通知"):
+            try:
+                focus_window(hwnd)
+            except (win32gui.error, NativeFocusDenied) as error:
+                # Denied native activation is recovered by selecting the actual browser tab.
+                record("native-focus-denied", error=str(error))
+                continue
+            if not close_handoff:
+                stop_taskbar_attention(hwnd)
+                record("done", closed=False)
+                return {"reused": True, "closed": False}
+            candidates.append((hwnd, None))
             break
     if not candidates:
-        for window in browser_windows():
-            if matches_dsh_title(win32gui.GetWindowText(window)):
-                candidates.append((window, None))
+        for hwnd in windows:
+            root = ui_control(hwnd)
+            for control in controls(root, deadline):
+                if control.ControlType in TAB_TYPES:
+                    name = control.Name
+                    if matches_dsh_title(name) and not name.startswith("Windows 通知"):
+                        candidates.append((hwnd, control))
+                        break
+            if candidates:
                 break
     if not candidates:
         return {"reused": False, "closed": False}
@@ -135,11 +124,14 @@ def reuse(marker):
         tab.SetFocus()
     else:
         record("focus", selectedTab=False)
-        focus_window(hwnd)
     closed = False
+    if not close_handoff:
+        stop_taskbar_attention(hwnd)
+        record("done", closed=False)
+        return {"reused": True, "closed": False}
     record("close")
     for browser in browser_windows():
-        for control in controls(auto.ControlFromHandle(browser), deadline):
+        for control in controls(ui_control(browser), deadline):
             if control.ControlType in TAB_TYPES and marker in control.Name:
                 for button in controls(control, deadline, max_depth=3):
                     if button.ControlType == 50000 and ("关闭" in button.Name or "close" in button.Name.lower()):
@@ -149,6 +141,7 @@ def reuse(marker):
                             closed = True
                             break
                 break
+    stop_taskbar_attention(hwnd)
     record("done", closed=closed)
     return {"reused": True, "closed": closed}
 
@@ -158,8 +151,11 @@ if __name__ == "__main__":
     marker = payload["marker"]
     if not isinstance(marker, str) or not marker.startswith("dsh-notification-receipt-") or len(marker) > 80:
         raise ValueError("Invalid notification handoff marker")
+    close_handoff = payload.get("closeHandoff", False)
+    if not isinstance(close_handoff, bool):
+        raise ValueError("Invalid notification handoff option")
     try:
-        print(json.dumps(reuse(marker)))
+        print(json.dumps(reuse(marker, close_handoff)))
     except Exception:
         Path(__file__).with_name("reuse-errors.log").write_text(traceback.format_exc(), encoding="utf-8")
         raise

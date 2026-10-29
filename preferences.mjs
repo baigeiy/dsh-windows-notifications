@@ -1,10 +1,10 @@
-/** Persist the independent foreground-notification preference. */
+/** Persist local notification appearance, focus and click preferences. */
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 const file = join(dirname(fileURLToPath(import.meta.url)), 'settings.json')
 export const DEFAULTS = Object.freeze({
-  notifyWhenFocused: false, appName: 'DeepSeek Harness', appIcon: 'official', notificationIcon: 'whale',
+  notifyWhenFocused: false, openDshOnClick: true, appName: 'DeepSeek Harness', appIcon: 'official', notificationIcon: 'whale',
   questionTitle: '大肥鱼问你话呢', approvalTitle: '大肥鱼问你话呢', completionTitle: '干完了喵',
 })
 
@@ -13,6 +13,7 @@ function validate(value) {
   for (const key of Object.keys(value)) if (!Object.hasOwn(DEFAULTS, key)) throw new Error(`Unknown notification preference: ${key}`)
   const next = { ...DEFAULTS, ...value }
   if (typeof next.notifyWhenFocused !== 'boolean') throw new Error('notifyWhenFocused must be a boolean')
+  if (typeof next.openDshOnClick !== 'boolean') throw new Error('openDshOnClick must be a boolean')
   for (const key of ['appName', 'questionTitle', 'approvalTitle', 'completionTitle']) {
     if (typeof next[key] !== 'string' || !next[key].trim() || next[key].length > (key === 'appName' ? 64 : 100) || /[\u0000-\u001f]/u.test(next[key])) throw new Error(`Invalid ${key}`)
     next[key] = next[key].trim()

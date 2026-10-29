@@ -26,6 +26,20 @@ class ImageTests(unittest.TestCase):
         xml = ElementTree.fromstring(notify.build_xml(payload))
         self.assertEqual(xml.find("./visual/binding/image").attrib["src"], "file:///E:/中文%20%23%25%26/icon.png")
 
+    def test_disabled_opening_has_no_activation_url_or_open_button(self):
+        payload = {"icon": "file:///E:/icon.png", "title": "标题", "body": "正文", "openDshOnClick": False}
+        xml = ElementTree.fromstring(notify.build_xml(payload))
+        self.assertEqual(xml.attrib, {"activationType": "background"})
+        actions = xml.findall("./actions/action")
+        self.assertEqual([action.attrib for action in actions], [{"content": "确认收到", "activationType": "system", "arguments": "dismiss"}])
+
+    def test_existing_preferences_keep_click_to_open_enabled(self):
+        payload = {"icon": "file:///E:/icon.png", "url": "dsh-local-notification://open?token=test", "title": "标题", "body": "正文"}
+        xml = ElementTree.fromstring(notify.build_xml(payload))
+        self.assertEqual(xml.attrib["activationType"], "protocol")
+        self.assertEqual(xml.attrib["launch"], payload["url"])
+        self.assertEqual(xml.findall("./actions/action")[-1].attrib["arguments"], payload["url"])
+
     def test_windows_reads_image_in_unicode_directory(self):
         source = Path(__file__).with_name("whale-icon.png")
         temp_root = Path(__file__).parent / "build" / "tmp"

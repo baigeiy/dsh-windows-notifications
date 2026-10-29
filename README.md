@@ -8,6 +8,8 @@
 
 [安装](#安装) · [功能](#功能) · [设置](#设置) · [文件说明](docs/files.md) · [开发与维护](docs/development.md)
 
+完整版：[v0.7.2 下载与更新说明](https://github.com/baigeiy/dsh-windows-notifications/releases/tag/v0.7.2) · 仅需纯文字提醒：[精简版分支](https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite)
+
 </div>
 
 ## 功能
@@ -17,7 +19,7 @@
 | 需要回答或确认操作 | 默认显示「大肥鱼问你话呢」 |
 | 本轮对话完成 | 默认显示「干完了喵」 |
 | 正在查看 dsh | 默认不弹出通知，可在设置中单独开启 |
-| 收到通知 | 「确认收到」收起通知；「打开 dsh」切回已有标签页 |
+| 收到通知 | 「确认收到」收起通知；默认可点击正文或「打开 dsh」切回已有标签页 |
 
 标题、应用来源名称、来源图标和提示图标均可自定义。插件内置「官方」和「大肥鱼」图标，也支持上传图片。
 
@@ -68,6 +70,7 @@ dsh plugin --profile web exec node -p "require('node:path').dirname(require.reso
 | 选项 | 默认值 |
 | --- | --- |
 | 聚焦时也弹出通知 | 关闭 |
+| 点击通知打开 DSH | 开启 |
 | 显示应用名字 | DeepSeek Harness |
 | 显示应用图标 | 官方 |
 | 提示图标 | 大肥鱼 |
@@ -92,7 +95,9 @@ dsh plugin --profile web exec node -p "require('node:path').dirname(require.reso
 
 ## 使用说明
 
-点击通知正文或「打开 dsh」会选择已有的 dsh 标签页；没有打开时才新开页面。「确认收到」只收起通知，不会代替回答或批准操作。多个 dsh 标签页同时打开时选择第一个匹配页面，暂不定位具体会话。
+「点击通知打开 DSH」开启时，点击通知正文或「打开 dsh」会选择已有的 dsh 标签页；没有打开时才新开页面。关闭并保存后，新通知隐藏「打开 dsh」按钮，点击正文只收起通知；旧通知中已有的「打开 dsh」按钮也只收起通知，不打开或切换浏览器。此开关与「聚焦时也弹出通知」相互独立。
+
+「确认收到」只收起通知，不会代替回答或批准操作。多个 dsh 标签页同时打开时优先已有窗口当前显示的 DSH 页面，否则选择首个匹配标签，暂不定位具体会话。
 
 点击激活已在 Edge 实测，其他浏览器的识别范围和限制见[开发与维护](docs/development.md#运行方式)。
 

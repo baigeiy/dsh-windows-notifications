@@ -46,7 +46,7 @@ export function attachWeb(ctx, clients, preview, acknowledgements = new Map(), b
       const marker = `dsh-notification-receipt-${token.slice(0, 12)}`
       const endpoint = JSON.stringify(`/dsh-notifications/reuse?token=${token}`).replaceAll('<', '\\u003c')
       const destination = JSON.stringify(baseUrl).replaceAll('<', '\\u003c')
-      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'referrer-policy': 'no-referrer' }).end(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>${marker}</title><body><p id="status">正在返回已打开的 dsh 页面…</p><script>fetch(${endpoint},{method:'POST'}).then(async r=>{if(!r.ok)throw Error();const result=await r.json();if(result.reused){document.getElementById('status').textContent='已返回原来的 dsh 页面，可以关闭此标签页';window.close()}else{location.replace(${destination})}}).catch(()=>{document.getElementById('status').textContent='无法切换到 dsh，请重试通知或手动选择已有标签页'})</script></body></html>`)
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'referrer-policy': 'no-referrer' }).end(`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>${marker}</title><body><p id="status">正在返回已打开的 dsh 页面…</p><script>fetch(${endpoint},{method:'POST'}).then(async r=>{if(!r.ok)throw Error();const result=await r.json();if(result.openingDisabled){document.getElementById('status').textContent='通知已收起';window.close()}else if(result.reused){document.getElementById('status').textContent='已返回原来的 dsh 页面，可以关闭此标签页';window.close()}else{location.replace(${destination})}}).catch(()=>{document.getElementById('status').textContent='无法切换到 dsh，请重试通知或手动选择已有标签页'})</script></body></html>`)
     })
     add('/dsh-notifications/reuse', async (req, res) => {
       const token = new URL(req.url ?? '/', 'http://local').searchParams.get('token')
@@ -56,6 +56,10 @@ export function attachWeb(ctx, clients, preview, acknowledgements = new Map(), b
       }
       const marker = `dsh-notification-receipt-${token.slice(0, 12)}`
       acknowledgements.delete(token)
+      if (!readPreferences().openDshOnClick) {
+        json(res, { reused: false, closed: false, openingDisabled: true })
+        return
+      }
       const result = JSON.parse(await native('reuse-browser.py', { marker }))
       if (!res.destroyed) json(res, result)
     })

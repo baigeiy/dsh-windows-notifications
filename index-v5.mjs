@@ -46,12 +46,15 @@ export function apply(ctx, config = {}) {
     }
     title = preferences[kind === 'completed' ? 'completionTitle' : kind === 'approval' ? 'approvalTitle' : 'questionTitle']
     const tag = createHash('sha256').update(`${kind}-${sessionId ?? 'test'}`).digest('hex').slice(0, 16)
-    const token = randomBytes(32).toString('base64url')
     const now = Date.now()
     for (const [key, receipt] of acknowledgements) if (now - receipt.time > 86400000) acknowledgements.delete(key)
-    acknowledgements.set(token, { tag, time: now })
-    const openUrl = new URL('dsh-local-notification://open')
-    openUrl.searchParams.set('token', token)
+    let token, openUrl
+    if (preferences.openDshOnClick) {
+      token = randomBytes(32).toString('base64url')
+      acknowledgements.set(token, { tag, time: now })
+      openUrl = new URL('dsh-local-notification://open')
+      openUrl.searchParams.set('token', token)
+    }
     const child = spawn(pythonPath(),
       [join(directory, 'notify-v3.py')],
       { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'], timeout: timeoutMs })
@@ -66,7 +69,7 @@ export function apply(ctx, config = {}) {
       })
       child.once('close', code => {
         pending.delete(child)
-        if (code !== 0 || output.trim() === 'skipped-focused') acknowledgements.delete(token)
+        if (token !== undefined && (code !== 0 || output.trim() === 'skipped-focused')) acknowledgements.delete(token)
         if (code === 0) record(output.trim() === 'skipped-focused' ? 'skipped-focused' : 'submitted', { notification: kind, sessionId })
         else if (!disposed) {
           logger.warn('Windows notification exited with %s: %s', code, stderr)
@@ -79,7 +82,7 @@ export function apply(ctx, config = {}) {
     child.stdin.on('error', error => {
       if (!disposed) logger.warn('Could not send notification text: %s', String(error))
     })
-    child.stdin.end(JSON.stringify({ title, body: body.replace(/\s+/gu, ' ').slice(0, 220), url: openUrl.href,
+    child.stdin.end(JSON.stringify({ title, body: body.replace(/\s+/gu, ' ').slice(0, 220), url: openUrl?.href,
       ...preferences, pageFocused: [...clients.values()].some(time => Date.now() - time < 10000),
       notifyWhenFocused: force || preferences.notifyWhenFocused,
       icon: pathToFileURL(join(directory, preferences.notificationIcon === 'custom' ? 'custom-notification.png' : preferences.notificationIcon === 'official' ? 'official-whale.png' : 'whale-icon.png')).href,
@@ -87,7 +90,7 @@ export function apply(ctx, config = {}) {
     return done
   }
 
-  attachWeb(ctx, clients, kind => send('', '这是一条测试通知。点“确认收到”收起；点击正文收起并打开 dsh。', kind, undefined, true), acknowledgements, baseUrl)
+  attachWeb(ctx, clients, kind => send('', '这是一条测试通知，可点“确认收到”收起。', kind, undefined, true), acknowledgements, baseUrl)
 
   ctx.effect(() => async () => {
     disposed = true
@@ -112,7 +115,7 @@ export function apply(ctx, config = {}) {
       const questions = ctx.get('sessionProjections')?.stateOf(session, 'userQuestions')
       if (questions?.questions.active.length > 0) return
       const workspace = session.header.cwd ? basename(session.header.cwd) : 'dsh'
-      send('干完了喵', `${workspace}：回复已完成，点击返回 dsh 查看。`, 'completed', session.id)
+      send('干完了喵', `${workspace}：回复已完成。`, 'completed', session.id)
     }
   }, { global: true })
   record('started', { pid: process.pid, baseUrl })

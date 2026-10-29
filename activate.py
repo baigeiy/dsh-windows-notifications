@@ -7,8 +7,7 @@ from urllib.parse import urlparse, parse_qs, urlencode
 from urllib.request import Request, urlopen
 import webbrowser
 
-from winrt.windows.ui.notifications import ToastNotificationManager
-from identity import APP_ID, PROTOCOL
+from identity_constants import APP_ID, PROTOCOL
 
 DIRECTORY = Path(__file__).resolve().parent
 
@@ -16,6 +15,7 @@ DIRECTORY = Path(__file__).resolve().parent
 def acknowledge(tag):
     if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", tag):
         raise ValueError("Invalid notification tag")
+    from winrt.windows.ui.notifications import ToastNotificationManager
     ToastNotificationManager.history.remove_grouped_tag_with_id(tag, "dsh-local", APP_ID)
 
 
@@ -26,7 +26,13 @@ def main(argument):
     if parsed.scheme not in ("http", "https") or parsed.hostname not in ("127.0.0.1", "localhost", "::1"):
         raise ValueError("Notification activation requires a local dsh URL")
     if argument == "--open":
-        webbrowser.open(url)
+        preferences_file = DIRECTORY / "settings.json"
+        preferences = json.loads(preferences_file.read_text(encoding="utf-8")) if preferences_file.exists() else {}
+        opening_enabled = preferences.get("openDshOnClick", True)
+        if not isinstance(opening_enabled, bool):
+            raise ValueError("openDshOnClick must be a boolean")
+        if opening_enabled:
+            webbrowser.open(url)
     else:
         activation = urlparse(argument)
         query = parse_qs(activation.query)
@@ -40,7 +46,7 @@ def main(argument):
             response.read()
         with urlopen(Request(origin + "/dsh-notifications/reuse" + suffix, method="POST"), timeout=20) as response:
             result = json.load(response)
-        if result["reused"] is False:
+        if result["reused"] is False and not result.get("openingDisabled", False):
             webbrowser.open(url)
 
 

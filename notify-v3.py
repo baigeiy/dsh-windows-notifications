@@ -18,15 +18,17 @@ def windows_image_uri(value):
 
 
 def build_xml(payload):
-    open_uri = payload["url"]
+    opening_enabled = payload.get("openDshOnClick", True)
+    activation = f'activationType="protocol" launch={quoteattr(payload["url"])}' if opening_enabled else 'activationType="background"'
+    open_action = f'<action content="打开 dsh" activationType="protocol" arguments={quoteattr(payload["url"])} afterActivationBehavior="default"/>' if opening_enabled else ""
     return (
-        f'<toast activationType="protocol" launch={quoteattr(open_uri)}>'
+        f'<toast {activation}>'
         '<visual><binding template="ToastGeneric">'
         f'<image placement="appLogoOverride" src={quoteattr(windows_image_uri(payload["icon"]))}/>'
         f'<text>{escape(payload["title"])}</text><text>{escape(payload["body"])}</text>'
         '</binding></visual><actions>'
         '<action content="确认收到" activationType="system" arguments="dismiss"/>'
-        f'<action content="打开 dsh" activationType="protocol" arguments={quoteattr(open_uri)} afterActivationBehavior="default"/>'
+        f'{open_action}'
         '</actions><audio src="ms-winsoundevent:Notification.Default"/></toast>'
     )
 

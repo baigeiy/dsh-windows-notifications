@@ -10,7 +10,9 @@ import activate
 
 class ActivationTests(unittest.TestCase):
     def setUp(self):
-        directory = tempfile.TemporaryDirectory()
+        temp_root = Path(__file__).parent / "build" / "tmp"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        directory = tempfile.TemporaryDirectory(dir=temp_root)
         self.addCleanup(directory.cleanup)
         path = Path(directory.name)
         (path / "runtime.json").write_text(json.dumps({"baseUrl": "http://127.0.0.1:3080/"}), encoding="utf-8")
@@ -30,6 +32,21 @@ class ActivationTests(unittest.TestCase):
         with patch.object(activate, "urlopen", side_effect=[io.BytesIO(b""), io.BytesIO(b'{"reused":false,"closed":false}')]), patch.object(activate.webbrowser, "open") as browser:
             activate.main(self.uri)
         browser.assert_called_once_with("http://127.0.0.1:3080/")
+
+    def test_disabled_opening_acknowledges_without_opening_any_page(self):
+        with patch.object(activate, "urlopen", side_effect=[io.BytesIO(b""), io.BytesIO(b'{"reused":false,"closed":false,"openingDisabled":true}')]) as request, patch.object(activate.webbrowser, "open") as browser:
+            activate.main(self.uri)
+        self.assertEqual(request.call_count, 2)
+        browser.assert_not_called()
+
+    def test_identity_shortcut_respects_disabled_opening(self):
+        (activate.DIRECTORY / "settings.json").write_text('{"openDshOnClick":false}', encoding="utf-8")
+        with patch.object(activate.webbrowser, "open") as browser:
+            activate.main("--open")
+            browser.assert_not_called()
+            (activate.DIRECTORY / "settings.json").write_text('{}', encoding="utf-8")
+            activate.main("--open")
+            browser.assert_called_once_with("http://127.0.0.1:3080/")
 
     def test_invalid_or_failed_receipt_never_opens_a_duplicate_page(self):
         with patch.object(activate, "urlopen") as request, patch.object(activate.webbrowser, "open") as browser:

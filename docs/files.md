@@ -11,10 +11,10 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 | [package.json](../package.json) | 插件包的清单，记录名称、版本、支持的系统架构、发行包包含哪些文件，以及 DSH 加载插件所需的 bundle 和客户端入口。 |
 | [cordis.patch.yml](../cordis.patch.yml) | DSH 组合配置：插入本插件，并配置 Web 服务地址 `baseUrl` 与发送通知的超时 `timeoutMs`。 |
 | [index-v5.mjs](../index-v5.mjs) | 服务端主入口。在 DSH 中监听提问、操作确认和根会话完成事件，读取通知偏好、生成点击凭证并启动通知辅助程序；停用插件时清理监听和子进程。 |
-| [client.js](../client.js) | DSH 设置界面中的客户端插件。提供 Windows 通知设置表单、图标选择、上传、预览和测试按钮，并连接本机设置接口。 |
+| [client.js](../client.js) | DSH 设置界面中的客户端插件。提供 Windows 通知设置表单、图标选择、上传、预览和测试按钮，并连接本机设置接口。文字输入框在宽屏下使用 220 像素宽度并与右边缘对齐，窄屏下换行适应可用空间。 |
 | [web-v4.mjs](../web-v4.mjs) | 在 DSH Web 服务中注册设置、图标上传、测试通知、焦点报告和通知点击等接口；检查请求与点击凭证，并为辅助程序提供操作入口。 |
 | [native.mjs](../native.mjs) | 从 Node 启动本机 Python 辅助脚本，优先使用发行包解压出的运行环境；收集结果和错误，并限制运行时间。 |
-| [preferences.mjs](../preferences.mjs) | 定义默认标题、图标和聚焦开关，校验并读写本机 `settings.json`。 |
+| [preferences.mjs](../preferences.mjs) | 定义默认标题、图标、聚焦开关和「点击通知打开 DSH」开关，校验并读写本机 `settings.json`。 |
 | [receipts.mjs](../receipts.mjs) | 保存通知的随机点击凭证和对应标签，使通知在 DSH 正常重启后仍可处理；加载时检查凭证格式并跳过超过 24 小时的记录。 |
 
 ## 设置与焦点
@@ -30,13 +30,15 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 
 | 文件 | 用途 |
 | --- | --- |
-| [notify-v3.py](../notify-v3.py) | 生成 Windows 通知内容并发送，包含标题、正文、图标、「确认收到」和「打开 dsh」动作；发送前检查焦点设置。图片地址保留中文字符，并转义空格和 URI 分隔符，以供 Windows 正确读取本机图片。 |
+| [notify-v3.py](../notify-v3.py) | 生成 Windows 通知内容并发送，包含标题、正文、图标和「确认收到」动作；按开关决定正文能否跳转及是否显示「打开 dsh」按钮，发送前检查焦点设置。图片地址保留中文字符，并转义空格和 URI 分隔符，以供 Windows 正确读取本机图片。 |
 | [identity.py](../identity.py) | 注册通知来源、用户级协议和开始菜单快捷方式，按用户设置生成来源图标与显示名称。初始化和更新外观设置时会调用它。 |
+| [identity_constants.py](../identity_constants.py) | 共享通知应用 ID 和协议名，供点击辅助程序读取，避免为标识符加载注册、图片和 COM 组件。 |
+| [window_activation.py](../window_activation.py) | 共享浏览器窗口前台激活和任务栏闪烁清除逻辑，供标签查找与通知点击程序调用。 |
 | [icons.py](../icons.py) | 处理用户上传的图标：检查图片大小和尺寸，转换为透明 PNG 后保存为本机自定义图标。 |
 | [notification-launcher.cs](../notification-launcher.cs) | Windows 协议启动器的源码。只接受指定格式的通知激活地址，然后调用 `activate.py`；发行包中提供预编译程序。 |
-| [activate.py](../activate.py) | 处理通知激活：向本机 DSH 接口确认并清除对应通知，尝试切回已有页面；没有可复用页面时打开配置的 DSH 地址。 |
+| [activate.py](../activate.py) | 处理通知激活：向本机 DSH 接口确认并清除对应通知，按当前开关决定是否尝试切回已有页面；允许跳转且没有可复用页面时打开配置的 DSH 地址。 |
 | [clear.py](../clear.py) | 接收通知标签并调用清除逻辑，从 Windows 通知历史中移除对应的本插件通知。 |
-| [reuse-browser.py](../reuse-browser.py) | 使用 Windows UI Automation 搜索支持的浏览器窗口与 DSH 标签页，尝试选择已有标签；它也能查找并关闭带指定标记的中转标签。浏览器识别限制见[开发与维护](development.md#运行方式)。 |
+| [reuse-browser.py](../reuse-browser.py) | 优先通过浏览器窗口标题直接激活当前显示 DSH 的窗口；需要查找其他标签时加载 Windows UI Automation，找到首个匹配标签即停止。显式传入 `closeHandoff: true` 时可查找并关闭带指定标记的中转标签；正常通知点击不执行这次额外查找。浏览器识别限制见[开发与维护](development.md#运行方式)。 |
 | [register-machine.py](../register-machine.py) | 将本插件的专属协议注册到 Windows 的机器级注册表。由 `setup.ps1` 调用，需要管理员权限。 |
 
 一次通知的主要路径是：DSH 事件进入 `index-v5.mjs`，经过焦点判断后由 `notify-v3.py` 发送；点击「打开 dsh」时，Windows 启动协议处理程序，`activate.py` 经本机接口调用标签复用逻辑。
@@ -81,6 +83,7 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 | [docs/files.md](files.md) | 本文件：按用途解释仓库文件和本机生成的数据。 |
 | [docs/releases/v0.7.0.md](releases/v0.7.0.md) | v0.7.0 的下载选项、初始化提示和版本说明。 |
 | [docs/releases/v0.7.1.md](releases/v0.7.1.md) | v0.7.1 的图片路径修复、下载方式和更新提示。 |
+| [docs/releases/v0.7.2.md](releases/v0.7.2.md) | v0.7.2 的打开 DSH 开关、点击提速、设置布局和下载说明。 |
 | [README.md](../README.md) | 项目首页，介绍功能、安装、设置和使用限制。 |
 | [LICENSE](../LICENSE) | 插件代码的 MIT 许可证。 |
 | [NOTICE.md](../NOTICE.md) | 图片、商标和内置第三方运行环境的许可说明。 |

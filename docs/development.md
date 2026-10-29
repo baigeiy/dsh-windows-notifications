@@ -8,9 +8,15 @@
 
 监听器运行在 dsh 的 Node 进程中；发送通知和处理点击时短暂启动辅助程序，没有独立常驻 Python 服务。网页聚焦时每 3 秒报告本机焦点状态。插件只提醒根会话，跳过子代理完成、取消和失败。
 
-Host 入口是 [`index-v5.mjs`](../index-v5.mjs)，客户端入口是 [`client.js`](../client.js)，bundle 由 [`cordis.patch.yml`](../cordis.patch.yml) 声明。原生点击激活参考 [Toasty 的专属协议方案](https://github.com/shanselman/toasty/blob/main/DEVELOPMENT.md#click-to-focus-feature)，通过 Windows UI Automation 寻找浏览器标签页。
+Host 入口是 [`index-v5.mjs`](../index-v5.mjs)，客户端入口是 [`client.js`](../client.js)，bundle 由 [`cordis.patch.yml`](../cordis.patch.yml) 声明。原生点击激活参考 [Toasty 的专属协议方案](https://github.com/shanselman/toasty/blob/main/DEVELOPMENT.md#click-to-focus-feature)，优先按窗口标题激活当前显示 DSH 的浏览器窗口；查找其他标签或需要焦点回退时才加载 Windows UI Automation。点击和清除程序直接读取共享标识符，避免加载通知身份注册与图片组件。
 
-Edge 已实测；代码包含 Chrome、Firefox、Brave、Vivaldi、Opera 的窗口识别，但这些浏览器未逐一实机验证。多个 dsh 标签页同时打开时选择第一个匹配页面，不定位到发通知的具体会话；浏览器标题或辅助功能结构变化可能影响识别。
+`settings.json` 中的 `openDshOnClick` 对应「点击通知打开 DSH」，默认 `true`；旧设置未包含此字段时仍启用。通知生成和点击激活都检查此开关，关闭后仅保留通知收起操作。用户操作及旧通知的行为见[使用说明](../README.md#使用说明)。
+
+Windows 拒绝直接激活窗口时，插件会改为查找并选择实际的 DSH 标签；正常点击不搜索中转页，也不绑定不同程序的输入线程。
+
+切回后会调用 `FlashWindowEx` 的 `FLASHW_STOP` 尝试清除目标窗口的任务栏提醒高亮。Windows 对协议激活进程的前台权限有限制，页面显示出来不一定表示已经取得前台焦点，任务栏高亮在部分系统上仍可能保留。
+
+Edge 已实测；代码包含 Chrome、Firefox、Brave、Vivaldi、Opera 的窗口识别，但这些浏览器未逐一实机验证。多个 dsh 标签页同时打开时优先已有窗口当前显示的 DSH 页面，否则选择首个匹配标签，不定位到发通知的具体会话；浏览器标题或辅助功能结构变化可能影响识别。
 
 ## 本机数据和卸载
 
@@ -31,6 +37,8 @@ Edge 已实测；代码包含 Chrome、Firefox、Brave、Vivaldi、Opera 的窗�
 ```
 
 前三项模拟原生操作，`check-image.py` 检查图片 URI，并调用 Windows URL 读取器打开中文及特殊字符路径下的临时图片；最后一项只读检查 Windows 协议支持。实际问答、完成通知和点击行为已在本机 dsh Web / Edge 验证；其他宿主版本需先使用测试通知检查。
+
+源码仓库另有 `node check-open.mjs` 和 `node check-client-v4.mjs`，分别验证打开开关的完整调用链及两种设置页面。这两项使用独立偏好与模拟通知，不修改本机设置，也不操作浏览器窗口；需要已安装依赖并构建的 DSH checkout，默认使用插件目录的上级目录，其他位置可通过 `DSH_CHECKOUT` 环境变量指定。
 
 ## 维护者构建与发布
 
