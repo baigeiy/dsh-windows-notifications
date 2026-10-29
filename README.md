@@ -8,7 +8,7 @@
 
 [安装](#安装) · [功能](#功能) · [设置](#设置) · [文件说明](docs/files.md) · [开发与维护](docs/development.md)
 
-完整版：[v0.7.2 下载与更新说明](https://github.com/baigeiy/dsh-windows-notifications/releases/tag/v0.7.2) · 仅需纯文字提醒：[精简版分支](https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite)
+完整版：[v0.7.2 下载与更新说明](https://github.com/baigeiy/dsh-windows-notifications/releases/tag/v0.7.2) · 仅需纯文字提醒：[精简版分支](https://github.com/baigeiy/dsh-windows-notifications/tree/lite)
 
 </div>
 
