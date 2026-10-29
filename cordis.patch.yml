@@ -1,6 +1,5 @@
 - insert:
-    - id: local-windows-notifications
-      name: dsh-windows-notifications
+    - id: windows-notifications-lite
+      name: dsh-windows-notifications-lite
       config:
-        baseUrl: http://127.0.0.1:3080/
         timeoutMs: 15000

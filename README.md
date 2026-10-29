@@ -1,111 +1,62 @@
-<div align="center">
+# DSH Windows 提示精简版
 
-![DSH Windows Notifications](docs/banner.svg)
+为 DeepSeek Harness 提供纯文字 Windows 原生通知。只有 DSH 不在前台时才提示；切到其他窗口、切到其他标签页或最小化后可以收到通知。
 
-需要你回答时叫你一声，完成后再提醒你回来。
+精简版位于本仓库的 [`codex/lite` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite)，完整版保留在 [`main` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/main)。两个版本使用独立的插件包名和通知来源标识。
 
-为 DeepSeek Harness Web 带来可自定义的 Windows 原生通知。
+通知按三行排列：**文件夹名称 → 对话名称 → 详细信息**。文件夹名称取会话工作目录的最后一级文件夹名称；对话尚未生成名称时，第二行显示会话 ID。
 
-[安装](#安装) · [功能](#功能) · [设置](#设置) · [文件说明](docs/files.md) · [开发与维护](docs/development.md)
-
-完整版：[v0.7.2 下载与更新说明](https://github.com/baigeiy/dsh-windows-notifications/releases/tag/v0.7.2) · 仅需纯文字提醒：[精简版分支](https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite)
-
-</div>
-
-## 功能
-
-| 场景 | 提示 |
+| 触发场景 | 详细信息 |
 | --- | --- |
-| 需要回答或确认操作 | 默认显示「大肥鱼问你话呢」 |
-| 本轮对话完成 | 默认显示「干完了喵」 |
-| 正在查看 dsh | 默认不弹出通知，可在设置中单独开启 |
-| 收到通知 | 「确认收到」收起通知；默认可点击正文或「打开 dsh」切回已有标签页 |
+| 主对话需要回答问题 | 问题的内容 |
+| 主对话需要确认操作 | 操作确认说明 |
+| 主对话正常完成 | 当前轮最后一条可见回复的文字摘要；没有文字时显示完成说明 |
 
-标题、应用来源名称、来源图标和提示图标均可自定义。插件内置「官方」和「大肥鱼」图标，也支持上传图片。
+应用来源显示原版样式的官方黑鲸鱼及 `DeepSeek Harness`，保留图标的浅色底板。通知正文保持纯文字，不包含正文图片、个性化标题、设置页面、打开浏览器按钮、网页中转或协议启动器。关闭按钮由 Windows 处理。子代理、已取消的问题、异常中断和仍在等回答的完成事件不会发出通知。详情最多 280 字符，Windows 可能进一步折叠显示。
 
-## 安装
+## 使用
 
-适用于 Windows 10/11 x64 上的 dsh Web。发行包已包含所需运行环境和原生程序，无需另外安装 Python、uv、Git 或编译器。首次使用需要以管理员身份运行一次初始化脚本。
+支持 Windows 10/11。已附带 `foreground.dll` 和通知身份程序，使用 Windows 自带的 PowerShell 5.1 和 .NET Framework，无需下载 Python、安装依赖、管理员权限或自行编译。
 
-1. 从 [GitHub Releases](https://github.com/baigeiy/dsh-windows-notifications/releases) 下载发行 ZIP，解压到长期保留的目录，例如 `E:\dsh-plugins\windows-notifications`。
+1. 下载 [精简版分支 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/codex/lite.zip)，将其中包含 `package.json` 的插件目录解压到长期保留的 E 盘位置，例如 `E:\dsh-windows提示精简版`。请完整保留随附的 DLL、EXE 和图标文件。
 
-2. 在管理员 PowerShell 中进入解压目录，运行一次初始化：
-
-   ```powershell
-   cd E:\dsh-plugins\windows-notifications
-   powershell -ExecutionPolicy Bypass -File .\setup.ps1
-   ```
-
-3. 在平时使用 dsh 的终端安装，然后重启 dsh Web 并刷新页面。如果解压到了其他目录，请将命令中的路径替换为实际目录：
-
-   ```powershell
-   dsh plugin --profile web add "link:E:/dsh-plugins/windows-notifications"
-   ```
-
-打开 **设置 → Windows 通知**，点击「保存并发送测试」。在 **插件市场 → 已安装** 可以启用或停用插件。
-
-更新或移动插件目录后，请在新目录重新运行初始化。发行页也提供 `.tgz` 包，供 dsh 原生安装命令使用；通过插件市场或 GitHub 安装后，也需在安装目录运行一次 `setup.ps1`。
-
-<details>
-<summary>通过插件市场或 GitHub 安装后初始化</summary>
-
-插件安装后尚未初始化时会报错。先在普通终端查找 web profile 中实际安装的插件目录：
+2. 在平时启动 DSH 的终端运行以下命令；若使用其他目录，将路径替换为实际位置：
 
 ```powershell
-dsh plugin --profile web exec node -p "require('node:path').dirname(require.resolve('dsh-windows-notifications/package.json'))"
+dsh plugin --profile web add "link:E:/dsh-windows提示精简版"
 ```
 
-在管理员 PowerShell 中进入输出的目录，运行 `powershell -ExecutionPolicy Bypass -File .\setup.ps1`，然后重新启用插件或重启 dsh Web。此步骤需要在每次安装位置改变后重新执行。
+3. 在插件的“已安装”列表中停用完整版，避免重复通知，再启用 `dsh-windows-notifications-lite` 并重启 DSH。
 
-包管理器更新可能更换目录，目录里的设置也可能无法保留。更新前备份 `settings.json` 和自定义图片 `custom-*.png`，更新后将需要保留的文件恢复到新目录。推荐使用上面的 ZIP 与稳定的本地链接目录。
+更新时将此分支的文件解压覆盖到同一个 E 盘目录，然后重启 DSH。这个本地链接始终指向该目录；完整版本的设置独立保留。
 
-有关 Git 源码和预构建 tarball 的安装方式，参见 [DSH 官方插件发布教程](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/publish.zh.md)。
+聚焦检测只读取 Windows 当前前台窗口的标题，识别 DSH 官方标题后缀，既不激活窗口，也不轮询浏览器。若修改 DSH 网页标题、使用隐藏产品标题的外壳或其他工具改写标题，可能无法识别聚焦状态。系统通知权限、勿扰模式和全屏规则仍由 Windows 控制。
 
-</details>
+空闲时没有常驻 Python、PowerShell 或独立服务；事件监听跟随 DSH 插件运行，每次发送时短暂启动一个隐藏的 PowerShell 进程，完成后退出。发送失败记录到 DSH 日志，不修改对话结果，也不自动重试。
 
-## 设置
+## 系统登记与卸载
 
-![Windows 通知设置页面](docs/settings.png)
+实际发送时，登记当前用户的 `HKCU\Software\Classes\AppUserModelId\DeepSeekHarness.Notifications.Lite`，名称为 `DeepSeek Harness`，来源图标指向本目录的 `sender-original.ico`。图标采用原版的官方黑鲸鱼样式。每次登记都使用当前目录，移动文件夹后无需另行修正图标路径。这是 Windows 管理的通知来源登记，使用独立 ID，不覆盖原版；不注册协议处理器、启动项或计划任务。
 
-| 选项 | 默认值 |
+Windows 同时需要一个带相同 AppUserModelID 的开始菜单快捷方式，才能识别桌面应用的来源名称和图标。插件将它登记为 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\DSH Windows Notifications Lite\DeepSeek Harness.lnk`；这是系统管理的位置。快捷方式指向 E 盘插件目录内的 `notification-identity.exe`，该程序立即退出，没有窗口和常驻进程，不打开 DSH 或浏览器。文件夹迁移后，下次通知会更新快捷方式的目标和图标路径。[Windows 桌面通知身份说明](https://learn.microsoft.com/en-us/windows/win32/shell/enable-desktop-toast-with-appusermodelid)。
+
+在插件市场停用或移除精简版后，可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall.ps1` 清除该来源登记、快捷方式及其历史通知。
+
+## 文件与验证
+
+| 文件 | 用途 |
 | --- | --- |
-| 聚焦时也弹出通知 | 关闭 |
-| 点击通知打开 DSH | 开启 |
-| 显示应用名字 | DeepSeek Harness |
-| 显示应用图标 | 官方 |
-| 提示图标 | 大肥鱼 |
-| 提问 / 操作确认标题 | 大肥鱼问你话呢 |
-| 对话结束标题 | 干完了喵 |
+| `index.mjs` | DSH 事件监听、发送子进程和停用清理 |
+| `content.mjs` | 对话名称、项目名称和可见回复摘要格式化 |
+| `notify.ps1` | 聚焦检查、来源登记、XML 转义和原生通知提交 |
+| `foreground.cs` / `foreground.dll` | 只读前台窗口检测的源代码和预编译组件 |
+| `identity.cs` | 登记通知快捷方式，读取其 AppUserModelID 并在迁移后更新路径 |
+| `identity-app.cs` / `notification-identity.exe` | 开始菜单身份目标的源代码和预编译程序，启动后立即退出 |
+| `official-whale.png` / `sender-original.ico` | 原版样式的官方黑鲸鱼 PNG 和 Windows 来源图标 |
+| `NOTICE.md` | 官方图形和名称的许可说明 |
+| `cordis.patch.yml` / `package.json` | DSH 组合包注册，使插件可启用或停用 |
+| `check.mjs` | 通知内容、过滤条件、停用清理、中文路径和原生 XML 检查 |
+| `build.ps1` | 维护者重新生成 DLL 的脚本，日常使用不需要运行 |
+| `uninstall.ps1` | 移除本精简版的通知来源登记和历史通知 |
 
-图片支持 PNG、JPEG、WebP、ICO，最大 4 MiB、最长边 4096 像素。保存立即生效；测试通知临时忽略聚焦状态。系统声音、权限和勿扰设置仍适用。
-
-<details>
-<summary>使用其他 dsh Web 端口</summary>
-
-默认服务地址为 `http://127.0.0.1:3080/`。使用其他端口时，在 web profile 的 `cordis.patch.yml` 中覆盖完整配置：
-
-```yaml
-- id: local-windows-notifications
-  config:
-    baseUrl: http://127.0.0.1:3081/
-    timeoutMs: 15000
-```
-
-</details>
-
-## 使用说明
-
-「点击通知打开 DSH」开启时，点击通知正文或「打开 dsh」会选择已有的 dsh 标签页；没有打开时才新开页面。关闭并保存后，新通知隐藏「打开 dsh」按钮，点击正文只收起通知；旧通知中已有的「打开 dsh」按钮也只收起通知，不打开或切换浏览器。此开关与「聚焦时也弹出通知」相互独立。
-
-「确认收到」只收起通知，不会代替回答或批准操作。多个 dsh 标签页同时打开时优先已有窗口当前显示的 DSH 页面，否则选择首个匹配标签，暂不定位具体会话。
-
-点击激活已在 Edge 实测，其他浏览器的识别范围和限制见[开发与维护](docs/development.md#运行方式)。
-
-<details>
-<summary>开发与维护</summary>
-
-查看[文件说明](docs/files.md)，了解项目中各文件的用途；查看[开发与维护](docs/development.md)，了解运行方式、本机数据、卸载与验证方法。
-
-</details>
-
-这是社区插件，非官方出品。代码采用 [MIT](LICENSE) 许可证，图片和商标说明见 [NOTICE.md](NOTICE.md)。
+运行 `node --test check.mjs` 验证；验证不发送通知、不写注册表。运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` 重新构建只读组件。
