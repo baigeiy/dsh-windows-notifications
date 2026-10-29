@@ -12,6 +12,12 @@
 
 </div>
 
+## 精简版
+
+只需要简单提醒的话，可以使用精简版：在 DSH 非聚焦时显示文件夹名称、对话名称和详细信息。Windows 10/11 可直接使用，无需安装 Python 或自行编译。
+
+[查看精简版介绍与安装说明](https://github.com/baigeiy/dsh-windows-notifications/tree/lite) · [下载精简版 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/lite.zip)
+
 ## 功能
 
 | 场景 | 提示 |
