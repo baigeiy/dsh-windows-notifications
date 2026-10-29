@@ -12,6 +12,7 @@ docs/*
 !docs/settings.png
 !docs/banner.svg
 !docs/development.md
+!docs/files.md
 !docs/releases/
 !docs/releases/*.md
 !native/

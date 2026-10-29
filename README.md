@@ -6,7 +6,7 @@
 
 为 DeepSeek Harness Web 带来可自定义的 Windows 原生通知。
 
-[安装](#安装) · [功能](#功能) · [设置](#设置) · [开发与维护](docs/development.md)
+[安装](#安装) · [功能](#功能) · [设置](#设置) · [文件说明](docs/files.md) · [开发与维护](docs/development.md)
 
 </div>
 
@@ -99,7 +99,7 @@ dsh plugin --profile web exec node -p "require('node:path').dirname(require.reso
 <details>
 <summary>开发与维护</summary>
 
-查看[开发与维护](docs/development.md)，了解运行方式、本机数据、卸载与验证方法。
+查看[文件说明](docs/files.md)，了解项目中各文件的用途；查看[开发与维护](docs/development.md)，了解运行方式、本机数据、卸载与验证方法。
 
 </details>
 
