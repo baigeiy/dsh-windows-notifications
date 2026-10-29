@@ -26,10 +26,11 @@ Edge 已实测；代码包含 Chrome、Firefox、Brave、Vivaldi、Opera 的窗�
 .\runtime\python.exe check-activation.py
 .\runtime\python.exe check-reuse.py
 .\runtime\python.exe check-focus.py
+.\runtime\python.exe check-image.py
 .\runtime\python.exe check-protocol.py
 ```
 
-前三项模拟原生操作，最后一项只读检查 Windows 协议支持。实际问答、完成通知和点击行为已在本机 dsh Web / Edge 验证；其他宿主版本需先使用测试通知检查。
+前三项模拟原生操作，`check-image.py` 检查图片 URI，并调用 Windows URL 读取器打开中文及特殊字符路径下的临时图片；最后一项只读检查 Windows 协议支持。实际问答、完成通知和点击行为已在本机 dsh Web / Edge 验证；其他宿主版本需先使用测试通知检查。
 
 ## 维护者构建与发布
 

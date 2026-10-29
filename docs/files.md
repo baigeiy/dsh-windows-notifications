@@ -30,7 +30,7 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 
 | 文件 | 用途 |
 | --- | --- |
-| [notify-v3.py](../notify-v3.py) | 生成 Windows 通知内容并发送，包含标题、正文、图标、「确认收到」和「打开 dsh」动作；发送前检查焦点设置。 |
+| [notify-v3.py](../notify-v3.py) | 生成 Windows 通知内容并发送，包含标题、正文、图标、「确认收到」和「打开 dsh」动作；发送前检查焦点设置。图片地址保留中文字符，并转义空格和 URI 分隔符，以供 Windows 正确读取本机图片。 |
 | [identity.py](../identity.py) | 注册通知来源、用户级协议和开始菜单快捷方式，按用户设置生成来源图标与显示名称。初始化和更新外观设置时会调用它。 |
 | [icons.py](../icons.py) | 处理用户上传的图标：检查图片大小和尺寸，转换为透明 PNG 后保存为本机自定义图标。 |
 | [notification-launcher.cs](../notification-launcher.cs) | Windows 协议启动器的源码。只接受指定格式的通知激活地址，然后调用 `activate.py`；发行包中提供预编译程序。 |
@@ -62,6 +62,7 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 | [check-activation.py](../check-activation.py) | 用模拟请求验证通知激活：复用已有标签、没有标签时打开地址，以及无效或失败凭证的处理。 |
 | [check-reuse.py](../check-reuse.py) | 用模拟的窗口与浏览器控件检查寻找和切换已有 DSH 标签的逻辑。 |
 | [check-focus.py](../check-focus.py) | 检查 DSH 窗口标题识别和聚焦时是否抑制通知的规则。 |
+| [check-image.py](../check-image.py) | 检查中文图片地址、特殊字符转义、XML 内容，并用 Windows URL 读取器读取临时图片；不发送通知。 |
 | [check-protocol.py](../check-protocol.py) | 查询 Windows 是否支持本插件的通知协议；只做查询，不启动页面。 |
 | [check-distribution.ps1](../check-distribution.ps1) | 在隔离目录复制发行文件，验证解压后的依赖、行为测试、重复初始化、校验失败和长路径处理；使用 `-SkipRegistration`，不进行系统注册。 |
 
@@ -79,6 +80,7 @@ GitHub 文件列表右侧显示的是该文件最近一次提交的信息。下�
 | [docs/development.md](development.md) | 介绍运行方式、浏览器限制、本机数据、卸载、验证及维护者构建步骤。 |
 | [docs/files.md](files.md) | 本文件：按用途解释仓库文件和本机生成的数据。 |
 | [docs/releases/v0.7.0.md](releases/v0.7.0.md) | v0.7.0 的下载选项、初始化提示和版本说明。 |
+| [docs/releases/v0.7.1.md](releases/v0.7.1.md) | v0.7.1 的图片路径修复、下载方式和更新提示。 |
 | [README.md](../README.md) | 项目首页，介绍功能、安装、设置和使用限制。 |
 | [LICENSE](../LICENSE) | 插件代码的 MIT 许可证。 |
 | [NOTICE.md](../NOTICE.md) | 图片、商标和内置第三方运行环境的许可说明。 |

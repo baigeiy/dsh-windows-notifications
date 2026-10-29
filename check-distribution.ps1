@@ -31,7 +31,7 @@ try {
     $python = Join-Path $package 'runtime/python.exe'
     & $python -c 'import winrt.windows.ui.notifications, winrt.windows.foundation, winrt.windows.system, win32api, pythoncom, PIL, uiautomation'
     if ($LASTEXITCODE -ne 0) { throw 'Installed runtime dependency check failed.' }
-    foreach ($test in @('check-activation.py', 'check-reuse.py', 'check-focus.py')) {
+    foreach ($test in @('check-activation.py', 'check-reuse.py', 'check-focus.py', 'check-image.py')) {
         & $python (Join-Path $package $test)
         if ($LASTEXITCODE -ne 0) { throw "Installed runtime test failed: $test" }
     }
