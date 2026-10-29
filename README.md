@@ -18,7 +18,7 @@
 
 支持 Windows 10/11。已附带 `foreground.dll` 和通知身份程序，使用 Windows 自带的 PowerShell 5.1 和 .NET Framework，无需下载 Python、安装依赖、管理员权限或自行编译。
 
-1. 下载 [精简版分支 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/codex/lite.zip)，将其中包含 `package.json` 的插件目录解压到长期保留的 E 盘位置，例如 `E:\dsh-windows提示精简版`。请完整保留随附的 DLL、EXE 和图标文件。
+1. 下载 [精简版分支 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/codex/lite.zip)，将其中包含 `package.json` 的插件目录解压到长期保留的硬盘位置，例如 `E:\dsh-windows提示精简版`。请完整保留随附的 DLL、EXE 和图标文件。
 
 2. 在平时启动 DSH 的终端运行以下命令；若使用其他目录，将路径替换为实际位置：
 
