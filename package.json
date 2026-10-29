@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "repository": {"type": "git", "url": "git+https://github.com/baigeiy/dsh-windows-notifications.git"},
-  "homepage": "https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite#readme",
+  "homepage": "https://github.com/baigeiy/dsh-windows-notifications/tree/lite#readme",
   "bugs": {"url": "https://github.com/baigeiy/dsh-windows-notifications/issues"},
   "icon": "./official-whale.png",
   "os": ["win32"],

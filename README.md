@@ -2,7 +2,7 @@
 
 为 DeepSeek Harness 提供纯文字 Windows 原生通知。只有 DSH 不在前台时才提示；切到其他窗口、切到其他标签页或最小化后可以收到通知。
 
-精简版位于本仓库的 [`codex/lite` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/codex/lite)，完整版保留在 [`main` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/main)。两个版本使用独立的插件包名和通知来源标识。
+精简版位于本仓库的 [`lite` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/lite)，完整版保留在 [`main` 分支](https://github.com/baigeiy/dsh-windows-notifications/tree/main)。两个版本使用独立的插件包名和通知来源标识。
 
 通知按三行排列：**文件夹名称 → 对话名称 → 详细信息**。文件夹名称取会话工作目录的最后一级文件夹名称；对话尚未生成名称时，第二行显示会话 ID。
 
@@ -18,7 +18,7 @@
 
 支持 Windows 10/11。已附带 `foreground.dll` 和通知身份程序，使用 Windows 自带的 PowerShell 5.1 和 .NET Framework，无需下载 Python、安装依赖、管理员权限或自行编译。
 
-1. 下载 [精简版分支 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/codex/lite.zip)，将其中包含 `package.json` 的插件目录解压到长期保留的硬盘位置，例如 `E:\dsh-windows提示精简版`。请完整保留随附的 DLL、EXE 和图标文件。
+1. 下载 [精简版分支 ZIP](https://github.com/baigeiy/dsh-windows-notifications/archive/refs/heads/lite.zip)，将其中包含 `package.json` 的插件目录解压到长期保留的硬盘位置，例如 `E:\dsh-windows提示精简版`。请完整保留随附的 DLL、EXE 和图标文件。
 
 2. 在平时启动 DSH 的终端运行以下命令；若使用其他目录，将路径替换为实际位置：
 
